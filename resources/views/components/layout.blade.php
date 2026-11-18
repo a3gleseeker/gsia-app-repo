@@ -11,6 +11,10 @@
         <nav class="navbar navbar-light bg-light">
             <div class="navbar-brand">
                 <a class="navbar-brand" href="/">Home</a>
+                @auth
+                    <a class='navbar-brand' href='/list_property'>List</a>
+                @else
+                @endauth
             </div>
             <div class="navbar-brand">
                 @auth

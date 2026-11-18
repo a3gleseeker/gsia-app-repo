@@ -13,7 +13,9 @@ class PropertyController extends Controller
      */
     public function index()
     {
-        $properties = DB::table('property')->get();
+        $properties = Property::all();
+
+        return view('index',['properties' => $properties]);
     }
 
     /**
@@ -29,7 +31,19 @@ class PropertyController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'link' => 'nullable|url|max:512',
+            'name' => 'required|string|max:255',
+            'city' => 'required|string|max:64',
+            'size' => 'required|numeric|min:0',
+            'postal' => 'required|string|max:16',
+            'price' => 'required|numeric|min:0',
+            'type' => 'required|string|max:24',
+        ]);
+
+        Property::create($validated);
+
+        return redirect()->route('home')->with('success', 'Property Listed');
     }
 
     /**

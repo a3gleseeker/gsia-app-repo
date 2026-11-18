@@ -6,7 +6,18 @@
         <div class="heading text-center mb-5">
             <h1>Hello GSIA Employee</h1>
         </div>
-        <form method='POST' action='#' enctype="multipart/form-data">
+
+        @if ($errors->any())
+            <div class="alert alert-danger">
+                <ul class="mb-0">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <form method='POST' action='/properties' enctype="multipart/form-data">
             @csrf
 
             <div class="mb-5 d-flex justify-content-center align-items-center">
