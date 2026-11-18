@@ -22,8 +22,8 @@
             @csrf
 
             <div data-mdb-input-init class="form-outline mb-4">
-                <input type="text" id="form2Example1" class="form-control" name='name' required autofocus/>
-                <label class="form-label" for="form2Example1">Username</label>
+                <input type="text" id="name" class="form-control" name='name' required autofocus/>
+                <label class="form-label" for="name">Username</label>
             </div>
 
             <div data-mdb-input-init class="form-outline mb-4">
