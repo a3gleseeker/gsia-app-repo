@@ -28,7 +28,7 @@ class Register extends Controller
             'password' => Hash::make($validated['password']),
         ]);
 
-        Auth::login($user);
+        #Auth::login($user);
 
         return redirect('/');
     }

@@ -11,7 +11,7 @@ Route::get('/', [PropertyController::class, 'index'])->name('home');
 Route::get('/properties/{property}', [PropertyController::class, 'show'])
     ->name('properties.show');
 
-Route::middleware(['auth', 'can:level-2'])->group(function () {
+Route::middleware(['auth', 'can:level-1'])->group(function () {
     Route::get('/list_property', fn () => view('propertypage'));
     Route::post('/properties', [PropertyController::class, 'store']);
 });

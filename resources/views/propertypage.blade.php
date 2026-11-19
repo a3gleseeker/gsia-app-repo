@@ -24,17 +24,18 @@
                 <img id="preview" style="max-width:200px">
             </div>
 
-            <!-- 
             <div data-mdb-input-init class="form-outline mb-4">
                 <input type="file" id="photo" class="form-control" name='photo' accept="image/*"  required autofocus/>
                 <label class="form-label" for="name">Image of Property</label>
             </div>
-            -->
-
+            
+            <!---
             <div data-mdb-input-init class="form-outline mb-4">
                 <input type="text" id="link" class="form-control" name='link' required autofocus/>
                 <label class="form-label" for="link">Image Link</label>
             </div>
+            -->
+
 
             <div data-mdb-input-init class="form-outline mb-4">
                 <input type="text" id="name" class="form-control" name='name' required autofocus/>

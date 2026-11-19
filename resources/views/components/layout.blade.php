@@ -12,9 +12,12 @@
             <div class="navbar-brand">
                 <a class="navbar-brand" href="/">Home</a>
                 @auth
+                    <a class='navbar-brand' href='/list_property'>List</a>
+                    <a class='navbar-brand' href='/#'>Panel</a>
+                @endauth
+
+                @auth
                     @can('level-2')
-                        <a class='navbar-brand' href='/list_property'>List</a>
-                        <a class='navbar-brand' href='/#'>Panel</a>
                         <a class='navbar-brand' href='/register'>New Employee</a>
                     @endcan
                 @else
