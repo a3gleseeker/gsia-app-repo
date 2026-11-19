@@ -5,6 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Property;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Str;
+use Jenssegers\Agent\Agent;
+use Stevebauman\Location\Facades\Location;
 
 class PropertyController extends Controller
 {
@@ -41,7 +45,7 @@ class PropertyController extends Controller
             'type' => 'required|string|max:24',
         ]);
 
-        Property::create($validated);
+        $request->user()->properties()->create($validated);
 
         return redirect()->route('home')->with('success', 'Property Listed');
     }
@@ -49,9 +53,40 @@ class PropertyController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Property $property)
+    public function show(Request $request, Property $property)
     {
-        //
+        $key = "viewed_property_{$property->id}";
+
+        if (! $request->session()->has($key)) {
+            $visitorId = $request->cookie('visitor_id');
+
+            if (! $visitorId) {
+                $visitorId = (string) Str::uuid();
+                Cookie::queue('visitor_id', $visitorId, 60 * 24 * 365);
+            }
+
+            $agent = new Agent();
+            $agent->setUserAgent($request->userAgent() ?? '');
+
+            $position = Location::get($request->ip());
+
+            $property->views()->create([
+                'user_id'     => $request->user()?->id,
+                'visitor_id'  => $visitorId,
+                'ip_address'  => $request->ip(),
+                'country'     => $position ? $position->countryName : null,
+                'region'      => $position ? $position->regionName : null,
+                'city'        => $position ? $position->cityName : null,
+                'device_type' => $agent->isTablet() ? 'tablet'
+                                : ($agent->isMobile() ? 'mobile' : 'desktop'),
+                'platform'    => $agent->platform() ?: 'Unknown',
+                'browser'     => $agent->browser() ?: 'Unknown',
+            ]);
+
+            $request->session()->put($key, true);
+        }
+
+        return view('showproperty', ['property' => $property]);
     }
 
     /**
@@ -77,4 +112,5 @@ class PropertyController extends Controller
     {
         //
     }
+
 }

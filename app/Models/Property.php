@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
 
 class Property extends Model
 {
@@ -23,6 +24,16 @@ class Property extends Model
             'size' => 'decimal:2',
             'price' => 'decimal:2',
         ];
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function views()
+    {
+        return $this->hasMany(PropertyView::class);
     }
 
 }

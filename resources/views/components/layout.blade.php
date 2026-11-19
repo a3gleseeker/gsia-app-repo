@@ -12,7 +12,11 @@
             <div class="navbar-brand">
                 <a class="navbar-brand" href="/">Home</a>
                 @auth
-                    <a class='navbar-brand' href='/list_property'>List</a>
+                    @can('level-2')
+                        <a class='navbar-brand' href='/list_property'>List</a>
+                        <a class='navbar-brand' href='/#'>Panel</a>
+                        <a class='navbar-brand' href='/register'>New Employee</a>
+                    @endcan
                 @else
                 @endauth
             </div>
@@ -21,11 +25,12 @@
                     <form method="POST" action="/logout">
                         @csrf
                         <span class="navbar-text me-2">Hello, {{ auth()->user()->name }}</span>
+                        <span class="navbar-text me-2"> {{ auth()->user()->level }}</span>
+                        
                         <button type="submit" class="btn btn-danger">Logout</button>
                     </form>
                 @else
                     <a class="navbar-brand" href="/login">Login</a>
-                    <a class="navbar-brand" href="/register">Register</a>
                 @endauth
             </div>
         </nav>

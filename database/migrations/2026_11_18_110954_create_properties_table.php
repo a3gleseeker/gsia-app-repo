@@ -21,6 +21,7 @@ return new class extends Migration
             $table->boolean('is_sold')->default(false);
             $table->string('postal', 16);
             $table->string('city', 64);
+            $table->string('description', 512);
             $table->timestamps();
         });
     }
