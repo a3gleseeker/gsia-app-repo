@@ -2,16 +2,9 @@
 
 <a href="{{ route('properties.show',  $property)}}" class='text-decoration-none'>
     <div class="card h-100 shadow-sm">
-        @if ($property->link)
-            <img src="{{ $property->link }}"
-                class="card-img-top"
-                alt="{{ $property->name }}"
-                style="height: 180px; object-fit: cover;">
-        @else
-            <div class="bg-light d-flex align-items-center justify-content-center text-muted"
-                style="height: 180px;">
-                No image
-            </div>
+        @if ($property->images->first())
+            <img src="{{ $property->images->first()->url }}" alt="{{ $property->name }}"
+                class="card-img-top" style="height: 200px; object-fit: cover;">
         @endif
 
         <div class="card-body">

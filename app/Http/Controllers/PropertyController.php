@@ -36,25 +36,47 @@ class PropertyController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'link' => 'nullable|url|max:512',
-            'name' => 'required|string|max:255',
-            'city' => 'required|string|max:64',
-            'size' => 'required|numeric|min:0',
-            'postal' => 'required|string|max:16',
-            'price' => 'required|numeric|min:0',
-            'type' => 'required|string|max:24',
+            'name'     => ['required', 'string', 'max:255'],
+            'size'     => ['required', 'numeric', 'min:0'],
+            'city'     => ['required', 'string', 'max:255'],
+            'postal'   => ['required', 'string', 'max:20'],
+            'type'     => ['required', 'string', 'max:100'],
+            'price'    => ['required', 'numeric', 'min:0'],
+            'images'   => ['required', 'array', 'min:1', 'max:10'],
+            'images.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:1024'],
+        ], [
+            'images.required' => 'Please add at least one image.',
+            'images.*.max'    => 'Each image must be 1 MB or smaller.',
+            'images.*.image'  => 'Each file must be an image.',
         ]);
 
-        $request->user()->properties()->create($validated);
+        $files = $validated['images'];
+        unset($validated['images']);
 
-        return redirect()->route('home')->with('success', 'Property Listed');
+        $property = DB::transaction(function () use ($request, $validated, $files) {
+            $property = $request->user()->properties()->create($validated);
+
+            foreach ($files as $position => $file) {
+                $property->images()->create([
+                    'path'     => $file->store('properties', 'public'),
+                    'position' => $position,
+                ]);
+            }
+
+            return $property;
+        });
+
+        return redirect()
+            ->route('properties.show', $property)
+            ->with('success', 'Property posted.');
     }
 
     /**
      * Display the specified resource.
      */
     public function show(Request $request, Property $property)
-    {
+    {   
+    
         $key = "viewed_property_{$property->id}";
 
         if (! $request->session()->has($key)) {
@@ -102,15 +124,58 @@ class PropertyController extends Controller
      */
     public function update(Request $request, Property $property)
     {
-        //
+        abort_unless($request->user(),403);
+
+        $validated = $request->validate([
+            'name'        => ['required', 'string', 'max:255'],
+            'city'        => ['required', 'string', 'max:255'],
+            'postal'      => ['required', 'string', 'max:20'],
+            'price'       => ['required', 'numeric', 'min:0'],
+            'type'        => ['required', 'string', 'max:100'],
+            'size'        => ['required', 'numeric', 'min:0'],
+            'link'        => ['nullable', 'url', 'max:2048'],
+            'description' => ['nullable', 'string'],
+            'is_sold'     => ['required', 'boolean'],
+            'images'      => ['nullable', 'array', 'max:10'],
+            'images.*'    => ['image', 'mimes:jpg,jpeg,png,webp', 'max:1024'], // KB = 1 MB
+            'latitude'    => ['nullable', 'numeric','between:-90,90', 'required_with:longitude'],
+            'longitude'   => ['nullable', 'numeric','between:-180,180', 'required_with:latitude'],
+        ], [
+        'images.*.max'   => 'Each image must be 1 MB or smaller.',
+        'images.*.image' => 'Each file must be an image.',
+        ]);
+
+
+        if ($request->hasFile('images')) {
+        $nextPosition = ($property->images()->max('position') ?? -1) + 1;
+
+        foreach ($request->file('images') as $file) {
+            $path = $file->store('properties', 'public');
+
+            $property->images()->create([
+                'path'     => $path,
+                'position' => $nextPosition++,
+            ]);
+            }
+        }
+
+        unset($validated['images']); // not a column on properties
+        $property->update($validated);
+
+        return redirect()
+            ->route('properties.show', $property)
+            ->with('success', 'Property updated.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Property $property)
     {
-        //
+        foreach ($property->images as $img) {
+            Storage::disk('public')->delete($img->path);
+        }
+
+        $property->delete();
+
+        return redirect()->route('home');
     }
 
 }

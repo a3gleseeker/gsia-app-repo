@@ -13,7 +13,7 @@
                 <a class="navbar-brand" href="/">Home</a>
                 @auth
                     <a class='navbar-brand' href='/list_property'>List</a>
-                    <a class='navbar-brand' href='/#'>Panel</a>
+                    <a class='navbar-brand' href='/adminindex'>Panel</a>
                 @endauth
 
                 @auth

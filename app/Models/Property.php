@@ -16,13 +16,19 @@ class Property extends Model
         'type',
         'price',
         'is_sold',
+        'description',
+        'latitude',
+        'longitude',
     ];
 
-    protected function casts(): array{
+    protected function casts(): array
+    {
         return [
-            'is_sold' => 'boolean',
-            'size' => 'decimal:2',
-            'price' => 'decimal:2',
+            'is_sold'   => 'boolean',
+            'size'      => 'decimal:2',
+            'price'     => 'decimal:2',
+            'latitude'  => 'float',
+            'longitude' => 'float',
         ];
     }
 
@@ -36,4 +42,8 @@ class Property extends Model
         return $this->hasMany(PropertyView::class);
     }
 
+    public function images()
+    {
+        return $this->hasMany(PropertyImage::class)->orderBy('position');
+    }
 }
