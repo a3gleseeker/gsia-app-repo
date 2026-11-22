@@ -3,6 +3,8 @@
         Post Property
     </x-slot:title>
 
+    <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
+
     <style>
         .post-form { padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px)); }
 
@@ -38,6 +40,10 @@
             border-radius: 50%;
             font-size: 1.25rem;
         }
+
+        /* Map picker */
+        #picker { height: 300px; }
+        @media (min-width: 992px) { #picker { height: 340px; } }
 
         @media (min-width: 992px) {
             .post-form { padding-bottom: 0; }
@@ -151,7 +157,29 @@
                                               class="form-control form-control-lg @error('description') is-invalid @enderror">{{ old('description') }}</textarea>
                                     @error('description') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
-                                
+
+                                {{-- Map location --}}
+                                <div class="col-12">
+                                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+                                        <label class="form-label mb-0">
+                                            Map location <span class="text-muted small">(optional)</span>
+                                        </label>
+                                        <div class="btn-group btn-group-sm" id="pickerStyles" role="group" aria-label="Map style">
+                                            <button type="button" class="btn btn-outline-secondary active" data-style="colorful">Colorful</button>
+                                            <button type="button" class="btn btn-outline-secondary" data-style="satellite">Satellite</button>
+                                            <button type="button" class="btn btn-outline-secondary" data-style="standard">Standard</button>
+                                        </div>
+                                    </div>
+
+                                    <div id="picker" class="rounded border"></div>
+                                    <input type="hidden" name="latitude" id="latitude" value="{{ old('latitude') }}">
+                                    <input type="hidden" name="longitude" id="longitude" value="{{ old('longitude') }}">
+
+                                    <div class="d-flex justify-content-between align-items-center mt-1">
+                                        <span class="form-text" id="pinStatus">Tap or click the map to place the pin.</span>
+                                        <button type="button" id="clearPin" class="btn btn-link btn-sm px-0 d-none">Remove pin</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -193,6 +221,9 @@
         </form>
     </div>
 
+    <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+
+    {{-- Photos --}}
     <script>
         const input = document.getElementById('images');
         const dropzone = document.getElementById('dropzone');
@@ -325,5 +356,74 @@
                 grid.appendChild(tile);
             });
         }
+    </script>
+
+    {{-- Map pin picker --}}
+    <script>
+        (function () {
+            const latInput = document.getElementById('latitude');
+            const lngInput = document.getElementById('longitude');
+            const status = document.getElementById('pinStatus');
+            const clearBtn = document.getElementById('clearPin');
+
+            const raster = (tiles, attribution) => ({
+                version: 8,
+                sources: { base: { type: 'raster', tiles: [tiles], tileSize: 256, attribution: attribution } },
+                layers: [{ id: 'base', type: 'raster', source: 'base' }]
+            });
+
+            const styles = {
+                colorful:  'https://tiles.openfreemap.org/styles/bright',
+                standard:  raster('https://tile.openstreetmap.org/{z}/{x}/{y}.png', '&copy; OpenStreetMap contributors'),
+                satellite: raster('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', 'Imagery &copy; Esri')
+            };
+
+            // Restores the pin if validation failed and the page reloaded with old values.
+            const hasPoint = latInput.value !== '' && lngInput.value !== '';
+            const start = hasPoint
+                ? [parseFloat(lngInput.value), parseFloat(latInput.value)]
+                : [123.8854, 10.3157]; // default center [lng, lat]: change to where your properties usually are
+
+            const picker = new maplibregl.Map({
+                container: 'picker',
+                style: styles.colorful,
+                center: start,
+                zoom: hasPoint ? 16 : 11,
+                cooperativeGestures: true // one finger scrolls the page, two fingers move the map
+            });
+            picker.addControl(new maplibregl.NavigationControl());
+            picker.addControl(new maplibregl.FullscreenControl());
+
+            let pin = null;
+
+            function setPin(lngLat) {
+                if (pin) pin.setLngLat(lngLat);
+                else pin = new maplibregl.Marker({ color: '#0d6efd' }).setLngLat(lngLat).addTo(picker);
+                latInput.value = lngLat.lat.toFixed(7);
+                lngInput.value = lngLat.lng.toFixed(7);
+                status.textContent = 'Pin placed. Click elsewhere to move it.';
+                clearBtn.classList.remove('d-none');
+            }
+
+            if (hasPoint) setPin(new maplibregl.LngLat(start[0], start[1]));
+
+            picker.on('click', e => setPin(e.lngLat));
+
+            clearBtn.addEventListener('click', () => {
+                if (pin) { pin.remove(); pin = null; }
+                latInput.value = '';
+                lngInput.value = '';
+                status.textContent = 'Tap or click the map to place the pin.';
+                clearBtn.classList.add('d-none');
+            });
+
+            document.querySelectorAll('#pickerStyles button').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    picker.setStyle(styles[btn.dataset.style]);
+                    document.querySelectorAll('#pickerStyles button')
+                        .forEach(b => b.classList.toggle('active', b === btn));
+                });
+            });
+        })();
     </script>
 </x-layout>

@@ -54,7 +54,7 @@ class LogPageView
             'visitor_id' => $visitorId,
             'user_id' => $request->user()?->id,
             'property_id' => $property instanceof Property ? $property->id : null,
-            'path' => '/' . ltrim($request->path(),  '/'),
+            'path' => '/' . ltrim($request->path(),  '/ '),
             'route_name' => $request->route()?->getName(),
             'referrer' => substr((string) $request->headers->get('referrer'), 0, 255, ) ?: null,
             'ip_address' => $request->ip(),

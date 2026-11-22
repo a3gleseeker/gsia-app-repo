@@ -3,12 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Property;
+use Illuminate\Support\Facades\Storage;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Str;
 use Jenssegers\Agent\Agent;
 use Stevebauman\Location\Facades\Location;
+
 
 class PropertyController extends Controller
 {
@@ -44,6 +47,9 @@ class PropertyController extends Controller
             'price'    => ['required', 'numeric', 'min:0'],
             'images'   => ['required', 'array', 'min:1', 'max:10'],
             'images.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:1024'],
+            'latitude'    => ['nullable', 'numeric','between:-90,90', 'required_with:longitude'],
+            'longitude'   => ['nullable', 'numeric','between:-180,180', 'required_with:latitude'],
+            
         ], [
             'images.required' => 'Please add at least one image.',
             'images.*.max'    => 'Each image must be 1 MB or smaller.',
@@ -159,7 +165,7 @@ class PropertyController extends Controller
             }
         }
 
-        unset($validated['images']); // not a column on properties
+        unset($validated['images']);
         $property->update($validated);
 
         return redirect()
@@ -169,13 +175,16 @@ class PropertyController extends Controller
 
     public function destroy(Property $property)
     {
-        foreach ($property->images as $img) {
-            Storage::disk('public')->delete($img->path);
-        }
+        $paths = $property->images->pluck('path');
 
+        $property->images()->delete();
         $property->delete();
 
-        return redirect()->route('home');
+        foreach ($paths as $path) {
+            Storage::disk('public')->delete($path);
+        }   
+
+        return redirect()->route('home')->with('success', 'Listing deleted.');
     }
 
 }

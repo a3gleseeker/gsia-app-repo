@@ -17,6 +17,8 @@ Route::middleware(['auth', 'can:level-1'])->group(function () {
     Route::get('/list_property', fn () => view('propertypage'));
     Route::post('/properties', [PropertyController::class, 'store']);
 
+    Route::delete('properties{property}', [PropertyController::class, 'destroy'])->name('properties.destroy');
+
     Route::put('/properties/{property}', [PropertyController::class, 'update'])
         ->name('properties.update');
 
