@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
+use App\Models\Inquiry;
 
 class Property extends Model
 {
@@ -45,5 +46,9 @@ class Property extends Model
     public function images()
     {
         return $this->hasMany(PropertyImage::class)->orderBy('position');
+    }
+
+    public function inquiries(){
+        return $this->hasMany(Inquiry::class);
     }
 }

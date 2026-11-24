@@ -164,7 +164,10 @@
                     </p>
 
                     @unless ($property->is_sold)
-                        <a href="#inquiryForm" class="btn btn-dark pd-inquire">Inquire now</a>
+                        <button type="button" class="btn btn-dark pd-inquire"
+                                data-bs-toggle="modal" data-bs-target="#inquiryModal">
+                            Inquire now
+                        </button>
                     @endunless
 
                 </aside>
@@ -172,14 +175,22 @@
         </div>
     </div>
 
+    {{-- Mobile bar: price + Inquire always in reach on phones --}}
     <div class="pd-mobile-bar d-lg-none">
         <div class="pd-mobile-bar-price">₱{{ number_format($property->price, 2) }}</div>
         @unless ($property->is_sold)
-            <a href="#inquiryForm" class="btn btn-dark">Inquire now</a>
+            <button type="button" class="btn btn-dark"
+                    data-bs-toggle="modal" data-bs-target="#inquiryModal">
+                Inquire
+            </button>
         @else
             <span class="pd-status is-sold">Sold</span>
         @endunless
     </div>
+
+    @unless ($property->is_sold)
+        <x-inquiryform :property="$property" />
+    @endunless
 
     @can('level-1')
         {{-- Edit modal --}}
@@ -322,14 +333,14 @@
         </div>
 
         {{-- Separate forms (outside the edit form, since forms can't be nested) --}}
-        <form id="deleteForm" method="POST" action="{{ route('properties.destroy', $property)}}">
+        <form id="deleteForm" method="POST" action="{{ route('properties.destroy', $property) }}">
             @csrf
             @method('DELETE')
         </form>
 
         @foreach ($property->images as $img)
             <form id="delete-image-{{ $img->id }}" method="POST"
-                  action="{{ route('properties.images.destroy', [$property, $img] )}}">
+                  action="{{ route('properties.images.destroy', [$property, $img]) }}">
                 @csrf
                 @method('DELETE')
             </form>

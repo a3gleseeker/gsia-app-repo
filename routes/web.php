@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\Register;
 use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\PropertyImageController; 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\InquiryController;
 
 Route::get('/', [PropertyController::class, 'index'])->name('home');
 
@@ -29,6 +30,10 @@ Route::middleware(['auth', 'can:level-1'])->group(function () {
 Route::get('/adminindex', [AdminController::class, 'index'])->name('adminindex');
 Route::get('/employeeindex', [AdminController::class, 'employee_index'])->name('emp_index');
 
+
+Route::post('/properties/{property}/inquiries', [InquiryController::class, 'store'])
+    ->middleware('throttle:5,1')
+    ->name('properties.inquiries.store');
 
 #login routes
 Route::view('/login', 'auth.login')->middleware('guest')->name('login');
