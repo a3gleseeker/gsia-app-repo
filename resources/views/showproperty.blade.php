@@ -153,6 +153,7 @@
             <div class="col-12 col-lg-4">
                 <aside class="pd-panel">
                     <div class="pd-price">₱{{ number_format($property->price, 2) }}</div>
+                    <span>Viewed by {{$view_count}} people</span>
                     @if ($pricePerSqm)
                         <div class="pd-price-sub">About ₱{{ number_format($pricePerSqm, 0) }} per sqm</div>
                     @endif

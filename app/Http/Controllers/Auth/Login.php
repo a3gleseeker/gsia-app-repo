@@ -20,9 +20,22 @@ class Login extends Controller
         ]);
 
         if (Auth::attempt($creds, $request->boolean('remember'))){
+
+            if (Auth::user()->status !== 'active'){
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+
+                return redirect('/login')->withErrors([
+                    'name' => 'Your account has been deactivated..'
+                ]);
+            }
+
             $request->session()->regenerate();
 
-            return redirect()->intended('/');
+            return redirect()->intended('/admin');
+
         }
 
         return back()

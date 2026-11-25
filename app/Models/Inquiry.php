@@ -14,6 +14,7 @@ class Inquiry extends Model
         'message',
         'phone',
         'email',
+        'status',
     ];
 
     public function property(){

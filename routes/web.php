@@ -8,6 +8,7 @@ use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\PropertyImageController; 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\InquiryController;
+use App\Http\Controllers\Property;
 
 Route::get('/', [PropertyController::class, 'index'])->name('home');
 
@@ -15,7 +16,7 @@ Route::get('/properties/{property}', [PropertyController::class, 'show'])
     ->name('properties.show');
 
 Route::middleware(['auth', 'can:level-1'])->group(function () {
-    Route::get('/list_property', fn () => view('propertypage'));
+    Route::get('/list_property', fn () => view('propertypage'))->name('properties.create');
     Route::post('/properties', [PropertyController::class, 'store']);
 
     Route::delete('properties{property}', [PropertyController::class, 'destroy'])->name('properties.destroy');

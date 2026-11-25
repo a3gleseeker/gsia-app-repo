@@ -114,7 +114,7 @@ class PropertyController extends Controller
             $request->session()->put($key, true);
         }
 
-        return view('showproperty', ['property' => $property]);
+        return view('showproperty', ['property' => $property, 'view_count' => $property->views()->count()]);
     }
 
     /**

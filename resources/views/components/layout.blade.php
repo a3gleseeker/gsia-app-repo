@@ -12,6 +12,7 @@
         <nav class="navbar navbar-light bg-light">
             <div class="navbar-brand">
                 <a class="navbar-brand" href="/">Home</a>
+                <a class="navbar-brand" href="/">Submit Documents</a>
                 @auth
                     <a class='navbar-brand' href='/list_property'>List</a>
                     <a class='navbar-brand' href='/adminindex'>Panel</a>

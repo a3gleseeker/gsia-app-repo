@@ -7,6 +7,13 @@
         <div class="heading text-center mb-5">
             <h1>Hello GSIA Employee</h1>
         </div>
+
+        @if ($errors->any())
+        <div class="alert alert-danger">
+            {{ $errors->first() }}
+        </div>
+        @endif
+
         <form method='POST' action='/login'>
             @csrf
 

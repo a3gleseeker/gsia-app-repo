@@ -9,6 +9,12 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Models\Property;
 
+
+// Fillament plugins or packages
+
+use Fillament\Models\Contracts\FilamentUser;
+use Fillament\Panel;
+
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
@@ -23,6 +29,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'status',
     ];
 
     /**
@@ -51,5 +58,13 @@ class User extends Authenticatable
 
     public function properties(){
         return $this->hasMany(Property::class);
+    }
+
+    public function canAccessPanel(Panel $panel): bool {
+        return $this->status === 'active' && in_array($this->level,  [1,2]);
+    }
+
+    public function isManager(): bool {
+        return (int) $this -> level >= 2;
     }
 }
