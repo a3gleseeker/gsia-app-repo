@@ -18,11 +18,46 @@ class PropertyController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $properties = Property::all();
+        $q    = trim((string) $request->query('q', ''));
+        $type = $request->query('type');
+        $searching = $q !== '' || filled($type);
 
-        return view('index',['properties' => $properties]);
+        $data = [
+            'q'         => $q,
+            'type'      => $type,
+            'searching' => $searching,
+            'types'     => Property::query()->whereNotNull('type')->distinct()->orderBy('type')->pluck('type'),
+            'results'   => null,
+            'newProperties'    => collect(),
+            'randomProperties' => collect(),
+        ];
+
+        if ($searching) {
+            $data['results'] = Property::with('images')
+                ->when($q !== '', fn ($query) => $query->where(fn ($w) => $w
+                    ->where('name', 'like', "%{$q}%")
+                    ->orWhere('city', 'like', "%{$q}%")
+                    ->orWhere('postal', 'like', "%{$q}%")
+                    ->orWhere('type', 'like', "%{$q}%")))
+                ->when(filled($type), fn ($query) => $query->where('type', $type))
+                ->latest()
+                ->paginate(9)
+                ->withQueryString();  
+
+            return view('index', $data);
+        }
+
+        $data['newProperties'] = Property::with('images')
+            ->where('is_sold', false)->latest()->take(6)->get();
+
+        $data['randomProperties'] = Property::with('images')
+            ->where('is_sold', false)
+            ->whereNotIn('id', $data['newProperties']->pluck('id'))
+            ->inRandomOrder()->take(6)->get();
+
+        return view('index', $data);
     }
 
     /**

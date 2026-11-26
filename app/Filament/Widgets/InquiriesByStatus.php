@@ -10,6 +10,9 @@ use App\Models\PageView;
 
 class InquiriesByStatus extends ChartWidget
 {
+    protected static ?int $sort = 1;
+    
+
     protected ?string $heading = 'Inquiries By Status';
 
     protected function getData(): array

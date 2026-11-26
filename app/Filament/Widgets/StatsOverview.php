@@ -10,7 +10,10 @@ use App\Models\Property;
 use App\Models\PageView;
 
 class StatsOverview extends StatsOverviewWidget
-{
+{   
+
+    protected static ?int $sort = 2;
+
     protected function getStats(): array
     {
         return [

@@ -9,7 +9,10 @@ use App\Models\Property;
 use App\Models\PageView; 
 
 class ViewsOverTime extends ChartWidget
-{
+{   
+
+    protected static ?int $sort = 3;
+
     protected ?string $heading = 'Views Over Time';
 
     protected function getData(): array
