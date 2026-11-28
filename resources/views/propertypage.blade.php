@@ -133,6 +133,20 @@
                                     </div>
                                 </div>
 
+                                <div class="col-12 col-sm-6">
+                                    <label for="status" class="form-label">Status</label>
+                                    <select id="status" name="status"
+                                            class="form-select form-select-lg @error('status') is-invalid @enderror"
+                                            required>
+                                        @foreach (['active' => 'Active', 'sold' => 'Sold', 'archived' => 'Archived'] as $value => $label)
+                                            <option value="{{ $value }}" {{ old('status', 'active') === $value ? 'selected' : '' }}>
+                                                {{ $label }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('status') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                </div>
+
                                 <div class="col-12 col-sm-8">
                                     <label for="city" class="form-label">City</label>
                                     <input type="text" id="city" name="city" autocomplete="address-level2"

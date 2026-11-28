@@ -17,17 +17,17 @@
                 <img src="{{ $image->url }}"
                      alt="{{ $property->name }}"
                      loading="lazy"
-                     class="w-100 h-100 object-fit-cover {{ $property->is_sold ? 'opacity-75' : '' }}"
-                     @if ($property->is_sold) style="filter: grayscale(.6);" @endif>
+                     class="w-100 h-100 object-fit-cover {{ $property->status === 'sold' ? 'opacity-75' : '' }}"
+                     @if ($property->status === 'sold') style="filter: grayscale(.6);" @endif>
             @else
                 <div class="d-flex align-items-center justify-content-center text-secondary">
                     <i class="bi bi-image fs-1" aria-hidden="true"></i>
                 </div>
             @endif
 
-            <span class="badge position-absolute top-0 start-0 m-3 shadow-sm {{ $property->is_sold ? 'text-bg-danger' : 'text-bg-success' }}"
+            <span class="badge position-absolute top-0 start-0 m-3 shadow-sm {{ $property->status === 'sold' ? 'text-bg-danger' : 'text-bg-success' }}"
                   style="width: fit-content; height: fit-content;">
-                {{ $property->is_sold ? 'Sold' : 'Available' }}
+                {{ $property->status === 'sold' ? 'Sold' : 'Available' }}
             </span>
         </div>
 

@@ -31,7 +31,13 @@ class PropertyForm
                     ->numeric()
                     ->default(0.0)
                     ->prefix('$'),
-                Toggle::make('is_sold')
+                Select::make('status')
+                    ->options([
+                        'active'   => 'Active',
+                        'sold'     => 'Sold',
+                        'archived' => 'Archived',
+                    ])
+                    ->default('active')
                     ->required(),
                 TextInput::make('postal')
                     ->required(),

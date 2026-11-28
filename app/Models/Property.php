@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
 use App\Models\Inquiry;
 
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
 class Property extends Model
 {
     protected $fillable = [
@@ -16,16 +19,16 @@ class Property extends Model
         'postal',
         'type',
         'price',
-        'is_sold',
         'description',
         'latitude',
         'longitude',
+        'status',
     ];
 
     protected function casts(): array
     {
         return [
-            'is_sold'   => 'boolean',
+            'status'   => 'string',
             'size'      => 'decimal:2',
             'price'     => 'decimal:2',
             'latitude'  => 'float',
@@ -51,4 +54,8 @@ class Property extends Model
     public function inquiries(){
         return $this->hasMany(Inquiry::class);
     }
+
+    public function documents(): BelongsToMany{
+        return $this->belongsToMany(Document::class, 'property_document'); 
+    }   
 }

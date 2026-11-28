@@ -28,6 +28,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
+            ->brandName('GS.Sia Realty Admin')
             ->login()
             ->colors([
                 'primary' => Color::Amber,
@@ -38,10 +39,7 @@ class AdminPanelProvider extends PanelProvider
                 Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
-            ->widgets([
-                AccountWidget::class,
-                FilamentInfoWidget::class,
-            ])
+            #->widgets([])#
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,

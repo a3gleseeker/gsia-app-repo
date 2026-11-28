@@ -12,6 +12,8 @@ use Illuminate\Support\Str;
 use Jenssegers\Agent\Agent;
 use Stevebauman\Location\Facades\Location;
 
+use Illuminate\Validation\Rule;
+
 
 class PropertyController extends Controller
 {
@@ -20,15 +22,24 @@ class PropertyController extends Controller
      */
     public function index(Request $request)
     {
-        $q    = trim((string) $request->query('q', ''));
-        $type = $request->query('type');
-        $searching = $q !== '' || filled($type);
+        $q        = trim((string) $request->query('q', ''));
+        $type     = $request->query('type');
+        $city     = $request->query('city');
+        $minPrice = $request->query('min_price');
+        $maxPrice = $request->query('max_price');
+
+        $searching = $q !== '' || filled($type) || filled($city)
+                || filled($minPrice) || filled($maxPrice);
 
         $data = [
             'q'         => $q,
             'type'      => $type,
+            'city'      => $city,
+            'min_price' => $minPrice,
+            'max_price' => $maxPrice,
             'searching' => $searching,
-            'types'     => Property::query()->whereNotNull('type')->distinct()->orderBy('type')->pluck('type'),
+            'types'     => Property::query()->where('status', 'active')->whereNotNull('type')->distinct()->orderBy('type')->pluck('type'),
+            'cities'    => Property::query()->where('status', 'active')->whereNotNull('city')->distinct()->orderBy('city')->pluck('city'),
             'results'   => null,
             'newProperties'    => collect(),
             'randomProperties' => collect(),
@@ -36,24 +47,28 @@ class PropertyController extends Controller
 
         if ($searching) {
             $data['results'] = Property::with('images')
+                ->where('status', 'active')
                 ->when($q !== '', fn ($query) => $query->where(fn ($w) => $w
                     ->where('name', 'like', "%{$q}%")
                     ->orWhere('city', 'like', "%{$q}%")
                     ->orWhere('postal', 'like', "%{$q}%")
                     ->orWhere('type', 'like', "%{$q}%")))
                 ->when(filled($type), fn ($query) => $query->where('type', $type))
+                ->when(filled($city), fn ($query) => $query->where('city', $city))
+                ->when(filled($minPrice), fn ($query) => $query->where('price', '>=', $minPrice))
+                ->when(filled($maxPrice), fn ($query) => $query->where('price', '<=', $maxPrice))
                 ->latest()
                 ->paginate(9)
-                ->withQueryString();  
+                ->withQueryString();
 
             return view('index', $data);
         }
 
         $data['newProperties'] = Property::with('images')
-            ->where('is_sold', false)->latest()->take(6)->get();
+            ->where('status', 'active')->latest()->take(6)->get();
 
         $data['randomProperties'] = Property::with('images')
-            ->where('is_sold', false)
+            ->where('status', 'active')
             ->whereNotIn('id', $data['newProperties']->pluck('id'))
             ->inRandomOrder()->take(6)->get();
 
@@ -84,6 +99,7 @@ class PropertyController extends Controller
             'images.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:1024'],
             'latitude'    => ['nullable', 'numeric','between:-90,90', 'required_with:longitude'],
             'longitude'   => ['nullable', 'numeric','between:-180,180', 'required_with:latitude'],
+            'status' => ['required', Rule::in(['active', 'sold', 'archived'])],
             
         ], [
             'images.required' => 'Please add at least one image.',
@@ -176,11 +192,11 @@ class PropertyController extends Controller
             'size'        => ['required', 'numeric', 'min:0'],
             'link'        => ['nullable', 'url', 'max:2048'],
             'description' => ['nullable', 'string'],
-            'is_sold'     => ['required', 'boolean'],
             'images'      => ['nullable', 'array', 'max:10'],
             'images.*'    => ['image', 'mimes:jpg,jpeg,png,webp', 'max:1024'], // KB = 1 MB
             'latitude'    => ['nullable', 'numeric','between:-90,90', 'required_with:longitude'],
             'longitude'   => ['nullable', 'numeric','between:-180,180', 'required_with:latitude'],
+            'status' => ['required', Rule::in(['active', 'sold', 'archived'])],
         ], [
         'images.*.max'   => 'Each image must be 1 MB or smaller.',
         'images.*.image' => 'Each file must be an image.',

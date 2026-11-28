@@ -50,8 +50,8 @@
                         <h1 class="pd-title">{{ $property->name }}</h1>
                         <p class="pd-address">{{ $property->city }}, {{ $property->postal }}</p>
                     </div>
-                    <span class="pd-status {{ $property->is_sold ? 'is-sold' : 'is-available' }} mt-2">
-                        {{ $property->is_sold ? 'Sold' : 'Available' }}
+                    <span class="pd-status {{ $property->status === 'sold' ? 'is-sold' : 'is-available' }} mt-2">
+                        {{ $property->status === 'sold' ? 'Sold' : 'Available' }}
                     </span>
                 </div>
 
@@ -84,7 +84,7 @@
 
                         <span class="pd-counter" id="galleryCounter">1 / {{ $property->images->count() }}</span>
 
-                        @if ($property->is_sold)
+                        @if ($property->status === 'sold')
                             <div class="pd-sold-veil"><span>Sold</span></div>
                         @endif
                     </div>
@@ -164,7 +164,7 @@
                         Listed {{ $property->created_at->diffForHumans() }}@if ($property->user) by {{ $property->user->name }}@endif
                     </p>
 
-                    @unless ($property->is_sold)
+                    @unless ($property->status === 'sold')
                         <button type="button" class="btn btn-dark pd-inquire"
                                 data-bs-toggle="modal" data-bs-target="#inquiryModal">
                             Inquire now
@@ -179,7 +179,7 @@
     {{-- Mobile bar: price + Inquire always in reach on phones --}}
     <div class="pd-mobile-bar d-lg-none">
         <div class="pd-mobile-bar-price">₱{{ number_format($property->price, 2) }}</div>
-        @unless ($property->is_sold)
+        @unless ($property->status === 'sold')
             <button type="button" class="btn btn-dark"
                     data-bs-toggle="modal" data-bs-target="#inquiryModal">
                 Inquire
@@ -189,7 +189,7 @@
         @endunless
     </div>
 
-    @unless ($property->is_sold)
+    @unless ($property->status === 'sold')
         <x-inquiryform :property="$property" />
     @endunless
 
@@ -262,12 +262,18 @@
                                     </select>
                                 </div>
 
-                                <div class="col-md-6">
-                                    <label for="is_sold" class="form-label">Status</label>
-                                    <select id="is_sold" name="is_sold" class="form-select">
-                                        <option value="0" @selected(! old('is_sold', $property->is_sold))>Available</option>
-                                        <option value="1" @selected(old('is_sold', $property->is_sold))>Sold</option>
+                                <div class="mb-3">
+                                    <label for="edit_status" class="form-label">Status</label>
+                                    <select id="edit_status" name="status"
+                                            class="form-select @error('status') is-invalid @enderror" required>
+                                        @foreach (['active' => 'Active', 'sold' => 'Sold', 'archived' => 'Archived'] as $value => $label)
+                                            <option value="{{ $value }}"
+                                                {{ old('status', $property->status) === $value ? 'selected' : '' }}>
+                                                {{ $label }}
+                                            </option>
+                                        @endforeach
                                     </select>
+                                    @error('status') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
 
                                 <div class="col-12">

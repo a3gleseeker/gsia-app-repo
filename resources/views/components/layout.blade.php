@@ -98,7 +98,7 @@
     <footer class="bg-dark text-white-50 py-4 mt-5">
         <div class="container d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2 small">
             <span>&copy; {{ date('Y') }} GSIA. All rights reserved.</span>
-            <span>Property listings &amp; document services</span>
+            
         </div>
     </footer>
 

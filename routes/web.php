@@ -9,6 +9,11 @@ use App\Http\Controllers\PropertyImageController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\InquiryController;
 use App\Http\Controllers\Property;
+use App\Http\Controllers\ClientController;
+
+use App\Http\Controllers\DocumentController;
+use App\Models\Document;
+use Illuminate\Support\Facades\Storage;
 
 Route::get('/', [PropertyController::class, 'index'])->name('home');
 
@@ -26,6 +31,27 @@ Route::middleware(['auth', 'can:level-1'])->group(function () {
 
     Route::delete('/properties/{property}/images/{image}', [PropertyImageController::class, 'destroy'])
         ->name('properties.images.destroy');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('/clients/create', [ClientController::class, 'create'])->name('clients.create');
+    Route::post('/clients', [ClientController::class, 'store'])->name('clients.store');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('/documents/create', [DocumentController::class, 'create'])->name('documents.create');
+    Route::post('/documents', [DocumentController::class, 'store'])->name('documents.store');
+
+    Route::get('/documents/{document}/edit', [DocumentController::class, 'edit'])->name('documents.edit');
+    Route::put('/documents/{document}', [DocumentController::class, 'update'])->name('documents.update');
+
+    Route::get('/documents/{document}/download', function (Document $document) {
+        return Storage::disk('local')->download($document->file_location);
+    })->name('documents.download');
+
+    Route::get('/documents/{document}/view', function (Document $document) {
+        return Storage::disk('local')->response($document->file_location);
+    })->name('documents.view');
 });
 
 Route::get('/adminindex', [AdminController::class, 'index'])->name('adminindex');
